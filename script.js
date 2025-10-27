@@ -2,16 +2,44 @@
 // Replace this URL with your Google Apps Script web app URL after deployment
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxn8CbbEPCumoup6woXNzwN9jwv5Thd9ttQyUYJyrzCxwEfBs3FIeMdubHPzAegbeQ/exec';
 
+// Anti-spam: Track page load time
+const pageLoadTime = Date.now();
+const MIN_SUBMISSION_TIME = 3000; // 3 seconds minimum
+
 // DOM Elements
 const form = document.getElementById('email-form');
 const emailInput = document.getElementById('email-input');
+const honeypotInput = document.getElementById('website');
 const submitBtn = form.querySelector('.submit-btn');
 const successMessage = document.getElementById('success-message');
 const errorMessage = document.getElementById('error-message');
 
+// Prevent double submissions
+let isSubmitting = false;
+
 // Form submission handler
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Prevent double submission
+    if (isSubmitting) {
+        return;
+    }
+
+    // Anti-spam check 1: Honeypot field
+    if (honeypotInput.value !== '') {
+        console.warn('Bot detected: honeypot field filled');
+        // Silently fail for bots (don't show error message)
+        return;
+    }
+
+    // Anti-spam check 2: Time validation
+    const timeSincePageLoad = Date.now() - pageLoadTime;
+    if (timeSincePageLoad < MIN_SUBMISSION_TIME) {
+        console.warn('Bot detected: form submitted too quickly');
+        showError('Please take a moment to review before submitting.');
+        return;
+    }
 
     // Get email value
     const email = emailInput.value.trim();
@@ -81,6 +109,7 @@ function showSuccess() {
         successMessage.classList.add('hidden');
         form.classList.remove('hidden');
         emailInput.value = '';
+        honeypotInput.value = ''; // Clear honeypot
     }, 3000);
 }
 
@@ -102,28 +131,6 @@ function showError(message) {
 }
 
 // Set form loading state
-function setFormLoading(isLoading) {
-    submitBtn.disabled = isLoading;
-    emailInput.disabled = isLoading;
-
-    if (isLoading) {
-        submitBtn.textContent = 'Submitting...';
-    } else {
-        submitBtn.textContent = 'Notify Me';
-    }
-}
-
-// Prevent double submissions
-let isSubmitting = false;
-
-form.addEventListener('submit', (e) => {
-    if (isSubmitting) {
-        e.preventDefault();
-        return;
-    }
-});
-
-// Reset submission flag when form is enabled
 function setFormLoading(isLoading) {
     isSubmitting = isLoading;
     submitBtn.disabled = isLoading;

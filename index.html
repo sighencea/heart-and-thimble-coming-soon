@@ -27,6 +27,16 @@
 
             <!-- Email Form -->
             <form id="email-form" class="email-form">
+                <!-- Honeypot field - hidden from humans, visible to bots -->
+                <input
+                    type="text"
+                    name="website"
+                    id="website"
+                    class="honeypot"
+                    tabindex="-1"
+                    autocomplete="off"
+                />
+
                 <div class="form-group">
                     <input
                         type="email"
