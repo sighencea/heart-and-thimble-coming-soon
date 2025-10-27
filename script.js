@@ -17,6 +17,9 @@ const errorMessage = document.getElementById('error-message');
 // Prevent double submissions
 let isSubmitting = false;
 
+// Set current year in footer
+document.getElementById('current-year').textContent = new Date().getFullYear();
+
 // Form submission handler
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
